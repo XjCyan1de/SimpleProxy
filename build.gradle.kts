@@ -1,7 +1,6 @@
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "6.1.0"
-    `maven-publish`
 }
 
 group = "com.github.xjcyan1de"
@@ -32,28 +31,3 @@ tasks {
         minimize()
     }
 }
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = project.group.toString()
-            artifactId = project.name
-            version = project.version.toString()
-
-            from(components["java"])
-        }
-    }
-
-    repositories {
-        if (System.getenv("GITHUB_TOKEN") != null) {
-            maven(url = "https://maven.pkg.github.com/XjCyan1de/SimpleProxy") {
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
-            }
-        }
-    }
-}
-
-
