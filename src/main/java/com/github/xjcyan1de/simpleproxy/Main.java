@@ -5,6 +5,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -12,8 +13,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.incubator.channel.uring.IOUring;
+import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
 import io.netty.util.internal.SystemPropertyUtil;
+
+import java.util.function.Supplier;
 
 public class Main {
 
@@ -30,9 +34,14 @@ public class Main {
                     epollEnabled ? EpollServerSocketChannel.class :
                             NioServerSocketChannel.class;
 
+    private static final Supplier<EventLoopGroup> eventLoopGroupImpl = () ->
+            ioUringEnabled ? new IOUringEventLoopGroup() :
+                    epollEnabled ? new EpollEventLoopGroup() :
+                            new NioEventLoopGroup();
+
     public static void main(String[] args) {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = eventLoopGroupImpl.get();
+        EventLoopGroup workerGroup = eventLoopGroupImpl.get();
         try {
             System.out.println("Starting proxy on port: " + PROXY_PORT);
             ServerBootstrap b = new ServerBootstrap();
