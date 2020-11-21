@@ -10,8 +10,9 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.incubator.channel.uring.IOUring;
 import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
@@ -43,15 +44,16 @@ public class Main {
         EventLoopGroup bossGroup = eventLoopGroupImpl.get();
         EventLoopGroup workerGroup = eventLoopGroupImpl.get();
         try {
-            System.out.println("Starting proxy on port: " + PROXY_PORT);
+            System.out.println("Starting proxy on port: " + PROXY_PORT + " using " + bossGroup.getClass().getSimpleName());
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(serverSocketChannelImpl)
-                    .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            System.out.println("Connected: " + ch.pipeline().channel());
+                            ch.pipeline().addLast("decoder", new HttpRequestDecoder());
+                            ch.pipeline().addLast("encoder", new HttpResponseEncoder());
+                            ch.pipeline().addLast("aggregator", new HttpObjectAggregator(Integer.MAX_VALUE));
                             ch.pipeline().addLast(new HttpProxyClientHandler());
                         }
                     })
