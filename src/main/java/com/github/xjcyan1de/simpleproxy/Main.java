@@ -65,4 +65,10 @@ public class Main {
             workerGroup.shutdownGracefully();
         }
     }
+
+    static {
+        System.out.println("IOUring.isAvailable(): " + IOUring.isAvailable());
+        System.out.println("-Diouring.enabled: " + SystemPropertyUtil.getBoolean("iouring.enabled", false));
+        System.out.println("Epoll.isAvailable(): " + Epoll.isAvailable());
+    }
 }
