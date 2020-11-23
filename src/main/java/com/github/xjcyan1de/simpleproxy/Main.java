@@ -68,7 +68,7 @@ public class Main {
 
     static {
         System.out.println("IOUring.isAvailable(): " + IOUring.isAvailable());
-        System.out.println("-Diouring.enabled: " + SystemPropertyUtil.getBoolean("iouring.enabled", false));
+        System.out.println("-Dio_uring: " + SystemPropertyUtil.getBoolean("io_uring", false));
         System.out.println("Epoll.isAvailable(): " + Epoll.isAvailable());
     }
 }
