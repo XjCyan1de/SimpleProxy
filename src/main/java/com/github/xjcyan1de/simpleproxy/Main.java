@@ -13,9 +13,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.incubator.channel.uring.IOUring;
-import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
-import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
 import io.netty.util.internal.SystemPropertyUtil;
 
 import java.util.function.Supplier;
@@ -27,18 +24,24 @@ public class Main {
     private static final boolean epollEnabled = Epoll.isAvailable();
 
     private static final boolean ioUringEnabled =
-            SystemPropertyUtil.getBoolean("io_uring", false)
-                    && IOUring.isAvailable();
+            SystemPropertyUtil.getBoolean("io_uring", false);
+//                    && IOUring.isAvailable();
 
     private static final Class<? extends ServerChannel> serverSocketChannelImpl =
-            ioUringEnabled ? IOUringServerSocketChannel.class :
-                    epollEnabled ? EpollServerSocketChannel.class :
-                            NioServerSocketChannel.class;
+//            ioUringEnabled ? IOUringServerSocketChannel.class :
+            epollEnabled ? EpollServerSocketChannel.class :
+                    NioServerSocketChannel.class;
 
     private static final Supplier<EventLoopGroup> eventLoopGroupImpl = () ->
-            ioUringEnabled ? new IOUringEventLoopGroup() :
-                    epollEnabled ? new EpollEventLoopGroup() :
-                            new NioEventLoopGroup();
+//            ioUringEnabled ? new IOUringEventLoopGroup() :
+            epollEnabled ? new EpollEventLoopGroup() :
+                    new NioEventLoopGroup();
+
+    static {
+//        System.out.println("IOUring.isAvailable(): " + IOUring.isAvailable());
+        System.out.println("-Dio_uring: " + SystemPropertyUtil.getBoolean("io_uring", false));
+        System.out.println("Epoll.isAvailable(): " + Epoll.isAvailable());
+    }
 
     public static void main(String[] args) {
         EventLoopGroup bossGroup = eventLoopGroupImpl.get();
@@ -64,11 +67,5 @@ public class Main {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
-
-    static {
-        System.out.println("IOUring.isAvailable(): " + IOUring.isAvailable());
-        System.out.println("-Dio_uring: " + SystemPropertyUtil.getBoolean("io_uring", false));
-        System.out.println("Epoll.isAvailable(): " + Epoll.isAvailable());
     }
 }
