@@ -35,6 +35,7 @@ public class HttpProxyClientHandler extends ChannelInboundHandlerAdapter {
         }
 
         HostAndPort hostAndPort = HostAndPort.fromString(httpRequest.headers().get("Host")).withDefaultPort(80);
+        System.out.println(ctx.channel() + " " + method + " " + hostAndPort);
 
         remoteChannel = new Bootstrap().group(new NioEventLoopGroup()).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
             @Override
