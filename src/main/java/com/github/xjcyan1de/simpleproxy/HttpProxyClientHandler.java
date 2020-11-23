@@ -35,25 +35,22 @@ public class HttpProxyClientHandler extends ChannelInboundHandlerAdapter {
             clientChannel.pipeline().remove("aggregator");
         }
 
-        String[] arr = httpRequest.headers().get("Host").split(":");
-        String host = arr[0].trim();
-        int port;
-        if (arr.length == 3) {
-            port = Integer.parseInt(arr[1]);
-        } else if (isHttps) {
-            port = 443;
-        } else {
-            port = 80;
-        }
+        System.out.println(httpRequest);
+        String hostHeader = httpRequest.headers().get("Host");
+        HostAndPort hostAndPort = HostAndPort.fromString(hostHeader).withDefaultPort(80);
+
+        System.out.println("Connect " + hostHeader + " " + hostAndPort);
 
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(clientChannel.eventLoop())
                 .channel(clientChannel.getClass())
+                .remoteAddress(hostAndPort.getHost(), hostAndPort.getPort())
                 .handler(new HttpProxyRemoteHandler(clientChannel));
-        ChannelFuture channelFuture = bootstrap.connect(host, port);
+        ChannelFuture channelFuture = bootstrap.connect();
         remoteChannel = channelFuture.channel();
 
         channelFuture.addListener(future -> {
+            System.out.println(hostAndPort + " Is connected: " + future.isSuccess());
             if (future.isSuccess()) {
                 clientChannel.config().setAutoRead(true);
                 if (!isHttps) {
@@ -61,6 +58,7 @@ public class HttpProxyClientHandler extends ChannelInboundHandlerAdapter {
                 }
             } else {
                 clientChannel.close();
+                future.cause().printStackTrace();
             }
         });
     }

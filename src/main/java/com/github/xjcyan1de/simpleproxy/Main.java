@@ -38,6 +38,7 @@ public class Main {
                     new NioEventLoopGroup();
 
     static {
+        System.setProperty("java.net.preferIPv6Addresses", "true");
 //        System.out.println("IOUring.isAvailable(): " + IOUring.isAvailable());
         System.out.println("-Dio_uring: " + SystemPropertyUtil.getBoolean("io_uring", false));
         System.out.println("Epoll.isAvailable(): " + Epoll.isAvailable());
