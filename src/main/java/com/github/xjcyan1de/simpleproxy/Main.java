@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 public class Main {
 
-    public static final int PROXY_PORT = 8080;
+    public static final int PROXY_PORT = SystemPropertyUtil.getInt("port", 8080);
 
     private static final boolean epollEnabled = Epoll.isAvailable();
 
